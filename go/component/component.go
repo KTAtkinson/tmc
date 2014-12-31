@@ -1,6 +1,9 @@
+package component
+
 type Component interface {
   GetId() string
   GetName() string
+  GetChildren() []Component
 
   SetName(string)
   AddChild(Component)
@@ -10,15 +13,31 @@ type Component interface {
 
 type BaseComponent struct {
   id, name string
+  loaded bool
   children []Component
 }
 
 func (c BaseComponent) GetId() string {
+  if c.loaded != true {
+    c.loadComponent()
+  }
   return c.id
 }
 
 func (c BaseComponent) GetName() string {
+  if c.loaded != true {
+    c.loadComponent()
+  }
   return c.name
+}
+
+
+func (c BaseComponent) GetChildren() []Component {
+  if c.loaded != true {
+    c.loadComponent()
+  }
+
+  return c.children
 }
 
 func (c BaseComponent) SetName(newName string) {
@@ -30,13 +49,13 @@ func (c BaseComponent) AddChild(child Component) {
 }
 
 func (c BaseComponent) IsDecendentOf(decent Component) bool {
-  for i := 0; i < len(self.children); i++ {
-    child := decent.children[i]
+  children := decent.GetChildren()
+  for i := 0; i < len(children); i++ {
+    child := children[i]
 
     if child.GetId() == c.GetId() {
       return true
-    }
-    else if c.IsDecendentOf(child) {
+    } else if c.IsDecendentOf(child) {
       return true
     }
   }
@@ -44,24 +63,8 @@ func (c BaseComponent) IsDecendentOf(decent Component) bool {
   return false
 }
 
-func BaseComponentFromJson(json string) Component, nil {
-  b := byte(json)
-
-  var c BaseComponent
-  err := json.Unmarshal(b, &c)
-
-  if err != nil {
-    return nil, err
-  }
-
-  return c, nil
-}
-
-func NewBaseComponent(id, name string) BaseComponent {
-  return BaseComponent{
-      id: id,
-      name: name,
-  }
+func (c BaseComponent) loadComponent() {
+  c.loaded = true
 }
 
 
